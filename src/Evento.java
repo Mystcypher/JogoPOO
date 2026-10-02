@@ -11,5 +11,4 @@ public abstract class Evento {
     }
 
     public abstract void executar(Nave nave);
-
 }

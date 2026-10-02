@@ -1,7 +1,7 @@
 public class Planeta {
 
     private String nome;
-    private Evento evento;
+    private Evento evento; // pode ser null: nem todo planeta tem evento
 
     public Planeta(String nome, Evento evento) {
         this.nome = nome;
@@ -14,6 +14,9 @@ public class Planeta {
 
     public void visitar(Nave nave) {
         System.out.println("\nVocê chegou ao planeta " + nome + "!");
-        evento.executar(nave);
+
+        if (evento != null) {
+            evento.executar(nave);
+        }
     }
 }

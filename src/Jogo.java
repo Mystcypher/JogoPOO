@@ -1,11 +1,12 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Jogo {
 
-    private Scanner scanner;
-    private Gato gato;
-    private Nave nave;
-    private Planeta[] planetas;
+    private final Scanner scanner;
+    private final Gato gato;
+    private final Nave nave;
+    private final ArrayList<Planeta> planetas;
     private int planetaAtual;
 
     public Jogo() {
@@ -14,12 +15,12 @@ public class Jogo {
         gato = new Gato("Miau");
         nave = new Nave("Bigode Espacial");
 
-        planetas = new Planeta[4];
-
-        planetas[0] = new Planeta("Marte", new Asteroide());
-        planetas[1] = new Planeta("Jupiter", new Alienigena());
-        planetas[2] = new Planeta("Saturno", new Estacao());
-        planetas[3] = new Planeta("Terra", null);
+        planetas = new ArrayList<>();
+        planetas.add(new Planeta("Lua", null));
+        planetas.add(new Planeta("Marte", new Asteroide()));
+        planetas.add(new Planeta("Jupiter", new Alienigena()));
+        planetas.add(new Planeta("Saturno", new Estacao()));
+        planetas.add(new Planeta("Terra", null));
 
         planetaAtual = 0;
     }
@@ -32,63 +33,80 @@ public class Jogo {
         System.out.println();
 
         System.out.println("Bem-vindo, " + gato.getNome() + "!");
-        System.out.println("Sua nave sofreu uma pane.");
+        System.out.println("Sua nave sofreu uma pane na Lua.");
         System.out.println("Você precisa voltar para a Terra.");
         System.out.println();
 
-        while (true) {
+        try {
+            while (true) {
 
-            mostrarStatus();
+                mostrarStatus();
 
-            if (nave.estaDestruida()) {
-                System.out.println("\nSua nave foi destruída!");
-                System.out.println("GAME OVER!");
-                break;
-            }
-
-            if (nave.semCombustivel()) {
-                System.out.println("\nVocê ficou sem combustível!");
-                System.out.println("GAME OVER!");
-                break;
-            }
-
-            if (planetaAtual == planetas.length - 1) {
-                System.out.println("\n=================================");
-                System.out.println("          VITÓRIA!");
-                System.out.println("=================================");
-                System.out.println("Você conseguiu voltar para a Terra!");
-                System.out.println("O gato " + gato.getNome() + " está em casa!");
-                break;
-            }
-
-            mostrarMenu();
-
-            int opcao = scanner.nextInt();
-
-            switch (opcao) {
-
-                case 1:
-                    viajar();
+                if (nave.estaDestruida()) {
+                    System.out.println("\nSua nave foi destruída!");
+                    System.out.println("GAME OVER!");
                     break;
+                }
 
-                case 2:
-                    nave.reparar();
+                if (chegouNaTerra()) {
+                    System.out.println("\n=================================");
+                    System.out.println("          VITÓRIA!");
+                    System.out.println("=================================");
+                    System.out.println("Você conseguiu voltar para a Terra!");
+                    System.out.println("O gato " + gato.getNome() + " está em casa!");
                     break;
+                }
 
-                case 3:
-                    System.out.println("Você decidiu continuar a missão.");
+                if (nave.semCombustivel()) {
+                    System.out.println("\nVocê ficou sem combustível para continuar!");
+                    System.out.println("GAME OVER!");
                     break;
+                }
 
-                case 4:
-                    System.out.println("Jogo encerrado.");
-                    return;
+                mostrarMenu();
 
-                default:
-                    System.out.println("Opção inválida!");
+                int opcao = lerOpcao();
+
+                switch (opcao) {
+
+                    case 1:
+                        viajar();
+                        break;
+
+                    case 2:
+                        nave.repararEmergencia();
+                        break;
+
+                    case 3:
+                        System.out.println("Você decidiu continuar a missão.");
+                        break;
+
+                    case 4:
+                        System.out.println("Jogo encerrado.");
+                        return;
+
+                    default:
+                        System.out.println("Opção inválida!");
+                }
             }
+        } finally {
+            scanner.close();
         }
+    }
 
-        scanner.close();
+    private boolean chegouNaTerra() {
+        return planetaAtual == planetas.size() - 1;
+    }
+
+    // Lê a opção como texto e converte; retorna -1 se não for número
+    private int lerOpcao() {
+        String entrada = scanner.nextLine().trim();
+
+        try {
+            return Integer.parseInt(entrada);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
     private void mostrarStatus() {
@@ -96,9 +114,10 @@ public class Jogo {
         System.out.println("\n---------------------------------");
         System.out.println("Piloto: " + gato.getNome());
         System.out.println("Nave: " + nave.getNome());
-        System.out.println("Planeta: " + planetas[planetaAtual].getNome());
+        System.out.println("Planeta: " + planetas.get(planetaAtual).getNome());
         System.out.println("Combustível: " + nave.getCombustivel());
         System.out.println("Integridade: " + nave.getIntegridade());
+        System.out.println("Reparos de emergência: " + nave.getReparosRestantes());
         System.out.println("---------------------------------");
     }
 
@@ -106,7 +125,7 @@ public class Jogo {
 
         System.out.println("\nO que deseja fazer?");
         System.out.println("1 - Viajar para o próximo planeta");
-        System.out.println("2 - Reparar a nave");
+        System.out.println("2 - Reparar a nave (custa 5 de combustível)");
         System.out.println("3 - Continuar");
         System.out.println("4 - Sair");
         System.out.print("Escolha: ");
@@ -114,19 +133,11 @@ public class Jogo {
 
     private void viajar() {
 
-        if (nave.getCombustivel() < 10) {
-            System.out.println("Você não possui combustível suficiente para viajar.");
+        if (!nave.viajar()) {
             return;
         }
 
-        nave.viajar();
-
         planetaAtual++;
-
-        Planeta planeta = planetas[planetaAtual];
-
-        if (planetaAtual < planetas.length - 1) {
-            planeta.visitar(nave);
-        }
+        planetas.get(planetaAtual).visitar(nave);
     }
 }

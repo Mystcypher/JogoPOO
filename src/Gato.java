@@ -9,5 +9,4 @@ public class Gato {
     public String getNome() {
         return nome;
     }
-
 }
