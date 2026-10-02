@@ -1,7 +1,7 @@
 public class Planeta {
 
     private String nome;
-    private Evento evento; // pode ser null: nem todo planeta tem evento
+    private Evento evento;
 
     public Planeta(String nome, Evento evento) {
         this.nome = nome;

@@ -98,7 +98,6 @@ public class Jogo {
         return planetaAtual == planetas.size() - 1;
     }
 
-    // Lê a opção como texto e converte; retorna -1 se não for número
     private int lerOpcao() {
         String entrada = scanner.nextLine().trim();
 
